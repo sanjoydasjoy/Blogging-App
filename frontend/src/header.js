@@ -2,12 +2,14 @@ import { useState, useEffect, useContext } from 'react';
 import{Link} from "react-router-dom"
 import { UserContext } from "./UserContext"
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+
 export default function Header(){
 
   const {setUserInfo,userInfo} = useContext(UserContext)
 
   useEffect(()=>{
-    fetch('http://localhost:4000/profile',{
+    fetch(`${API_BASE_URL}/profile`,{
       credentials: 'include'
     }).then(response=>{
       response.json().then(userInfo =>{
@@ -17,7 +19,7 @@ export default function Header(){
   },[])
 
   function logout(){
-    fetch('http://localhost:4000/logout',{
+    fetch(`${API_BASE_URL}/logout`,{
       credentials: "include",
       method: 'POST'
     })
