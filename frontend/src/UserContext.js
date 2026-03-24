@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+import { apiRequest } from './lib/api';
 
 export const UserContext = createContext({});
 
@@ -9,24 +8,30 @@ export function UserContextProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/profile`, {
-            credentials: 'include',
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
+        let ignore = false;
+
+        async function hydrateUser() {
+            try {
+                const userData = await apiRequest('/profile');
+                if (!ignore) {
+                    setUserInfo(userData);
+                }
+            } catch {
+                if (!ignore) {
+                    setUserInfo(null);
+                }
+            } finally {
+                if (!ignore) {
+                    setLoading(false);
+                }
             }
-            throw new Error('Not authenticated');
-        })
-        .then(userInfo => {
-            setUserInfo(userInfo);
-        })
-        .catch(() => {
-            setUserInfo(null);
-        })
-        .finally(() => {
-            setLoading(false);
-        });
+        }
+
+        hydrateUser();
+
+        return () => {
+            ignore = true;
+        };
     }, []);
 
     return (
